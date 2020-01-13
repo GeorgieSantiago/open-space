@@ -1,9 +1,10 @@
-import RNCAsyncStorage from '@react-native-community';
-console.log(RNCAsyncStorage, "async storage")
+//import RNCAsyncStorage from '@react-native-community';
+//console.log(RNCAsyncStorage, "async storage")
+import AsyncStorage from 'react-native'
 const localStorage = {
   store: async (key, value) => {
     try {
-      const result = await RNCAsyncStorage.setItem(key, JSON.stringify(value));
+      const result = await AsyncStorage.setItem(key, JSON.stringify(value));
       console.log('Value set successfully in localStore', {
         key,
         value,
@@ -20,7 +21,7 @@ const localStorage = {
   },
   get: async key => {
     try {
-      const value = await RNCAsyncStorage.getItem(key);
+      const value = await AsyncStorage.getItem(key);
       console.log('Value retrived successfully');
       return JSON.parse(value);
     } catch (e) {
@@ -28,7 +29,7 @@ const localStorage = {
     }
   },
   flush: async () => {
-    RNCAsyncStorage.clear()
+    AsyncStorage.clear()
   }
 };
 
