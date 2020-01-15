@@ -52,7 +52,7 @@ RoversStack.navigationOptions = {
   ),
 };
 
-LinRoversStackksStack.path = '';
+RoversStack.path = '';
 
 const PlanetsStack = createStackNavigator(
   {

@@ -4,9 +4,10 @@ import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Container, Text } from 'native-base';
-import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
-
+import * as api from './network/api'
+import { store } from './store/store'
+import { Provider as ReduxProvider } from 'react-redux'
 import AppNavigator from './navigation/AppNavigator';
 
 export default function App(props) {
@@ -24,7 +25,11 @@ export default function App(props) {
     return (
       <View style={styles.container}>
         {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
+        <ReduxProvider store={store}>
+          <Container>
+            <AppNavigator />
+          </Container>
+        </ReduxProvider>
       </View>
     );
   }
@@ -35,6 +40,11 @@ async function loadResourcesAsync() {
     Asset.loadAsync([
       require('./assets/images/robot-dev.png'),
       require('./assets/images/robot-prod.png'),
+      require('./assets/images/logo.png'),
+      require('./assets/images/static/earth.png'),
+      require('./assets/images/curiosity.png'),
+      require('./assets/images/spirit.png'),
+      require('./assets/images/opportunity.png'),
     ]),
     Font.loadAsync({
       // This is the font that we are using for our tab bar
@@ -45,6 +55,7 @@ async function loadResourcesAsync() {
       Roboto: require('native-base/Fonts/Roboto.ttf'),
       Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),
     }),
+    api.init(api)
   ]);
 }
 

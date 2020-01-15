@@ -1,5 +1,8 @@
 import axios from 'axios'
 import * as utility from './utility'
+import * as roverActions from '../store/actions/rover-actions'
+import * as homeActions from '../store/actions/home-actions'
+import * as appActions from '../store/actions/app-actions'
 //import { localStorage } from './localStorage'
 
 /**
@@ -8,7 +11,7 @@ import * as utility from './utility'
  */
 var client = axios.create({
     //baseURL: 'http://192.168.4.14:8000/api',
-    baseURL: 'http://127.0.0.1:8000/api',
+    baseURL: 'http://127.0.0.1:9000/api',
     timeout: 15000,
 });
 
@@ -24,6 +27,16 @@ function networkError(e, message) {
     return false
 }
 
+export async function init(self) {
+    //appActions.loading(true)
+    const apod = await self.apod()
+    const rovers = await self.getRovers()
+    //const neos = await self.getNeos()
+    //const orbitals = await self.getOrbitals()
+    homeActions.getApod(apod)
+    roverActions.getRovers(rovers)
+    //appActions.loading(false)   
+}
 /**
  * Attempt the cache before using the network request
  * @param {string} cacheString 
@@ -44,7 +57,8 @@ function networkError(e, message) {
  * Get Picture of the day from cache.
  * @return {Promise}
  */
-export function apod() {
+export async function apod() {
+    console.log("Making apod request")
     return client.get('/apod')
 }
 
@@ -53,6 +67,8 @@ export function apod() {
  * @return {Promise}
  */
 export function getRovers() {
+    console.log("Making rovers request")
+
     return client.get('/rovers')
 }
 
@@ -68,9 +84,9 @@ export function getRover(id) {
 /**
  * Local Rover Image
  */
-const curiosityImage = require("../../assets/static/curiosity.jpg")
-const spiritImage = require("../../assets/static/spirit.jpg")
-const opportunityImage = require("../../assets/static/opportunity.jpg")
+const curiosityImage = require("../assets/images/static/curiosity.jpg")
+const spiritImage = require("../assets/images/static/spirit.jpg")
+const opportunityImage = require("../assets/images/static/opportunity.jpg")
 export const getLocalRoverImage = name => {
     switch(name.toLowerCase()) {
         case "curiosity": 
@@ -106,6 +122,7 @@ export function getRoverImg(sol, page, rover) {
  * @return {Promise} 
  */
 export function getExoplanets(page=1) {
+    console.log("Making exoplanet request for page " + page)
     return client.get(`/exoplanets?page=${page}`)
 }
 
@@ -131,6 +148,7 @@ export function getExoplanetFilters() {
  * @return {Promise}
  */
 export function getOrbitals() {
+    console.log("Making orbitals request")
     return client.get('/orbitals')
 }
 
@@ -139,6 +157,7 @@ export function getOrbitals() {
  * @return {Promise}
  */
 export function getNeos() {
+    console.log("Making neos request")
     return client.get('/neo')
 }
 

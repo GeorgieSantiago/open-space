@@ -18,4 +18,8 @@ export function titleCase(str) {
     // Directly return the joined string
     return splitStr.join(' '); 
 }
+
+export function getUrlString(str) {
+    return str.replace(" ", "%20")
+}
  
