@@ -1,6 +1,7 @@
 const initialState = {
     loading: false,
     error: false,
+    hasError: false
 }
 
 export function appReducer(state=initialState, { type, payload }) {
@@ -8,7 +9,7 @@ export function appReducer(state=initialState, { type, payload }) {
         case "LOADING":
             return { ...state, loading: payload }
         case "ERROR": 
-            return { ...state, error: payload, loading: false }
+            return { ...state, error: payload, loading: false, hasError: true }
         default: 
             return {...state}
     }

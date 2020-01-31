@@ -1,6 +1,11 @@
 import { store } from '../store'
 
 export const loading = (mode) => (store.dispatch({
-    key: "LOADING",
+    type: "LOADING",
     payload: mode
+}))
+
+export const error = (message) => (store.dispatch({
+    type: "ERROR",
+    payload: message
 }))

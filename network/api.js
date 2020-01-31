@@ -9,11 +9,12 @@ import * as appActions from '../store/actions/app-actions'
  * Connect to open-space-api
  * @package https://github.com/GeorgieSantiago/open-space-api
  */
-var client = axios.create({
+export const client = axios.create({
     //baseURL: 'http://192.168.4.14:8000/api',
     baseURL: 'http://127.0.0.1:9000/api',
     timeout: 15000,
 });
+
 
 /**
  * Handles network request errors global
@@ -27,16 +28,17 @@ function networkError(e, message) {
     return false
 }
 
-export async function init(self) {
-    //appActions.loading(true)
-    const apod = await self.apod()
-    const rovers = await self.getRovers()
-    //const neos = await self.getNeos()
-    //const orbitals = await self.getOrbitals()
-    homeActions.getApod(apod)
-    roverActions.getRovers(rovers)
-    //appActions.loading(false)   
-}
+/**
+ * Network request handler
+ */
+/*const request = async queuedPromise => {
+    try {
+        return queuedPromise()
+    } catch (e) {
+        console.error(JSON.stringify(e))
+    }
+}*/
+
 /**
  * Attempt the cache before using the network request
  * @param {string} cacheString 
@@ -57,8 +59,7 @@ export async function init(self) {
  * Get Picture of the day from cache.
  * @return {Promise}
  */
-export async function apod() {
-    console.log("Making apod request")
+export function apod() {
     return client.get('/apod')
 }
 
@@ -67,8 +68,6 @@ export async function apod() {
  * @return {Promise}
  */
 export function getRovers() {
-    console.log("Making rovers request")
-
     return client.get('/rovers')
 }
 
@@ -79,6 +78,10 @@ export function getRovers() {
  */
 export function getRover(id) {
     return client.get(`/rover/${id}`)
+}
+
+export function getBodies(page=1) {
+    return client.get(`/bodies?page=${page}`)
 }
 
 /**
@@ -183,4 +186,3 @@ export function mediaSearch(query, page) {
 export function getMedia(id) {
     return client.get(`media/getById?media_id=${id}`)
 }
-

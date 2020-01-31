@@ -1,27 +1,76 @@
-import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { ExpoLinksView } from '@expo/samples';
-
+import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet, Image } from 'react-native';
+import { Container, Header, View, DeckSwiper, Card, CardItem, Thumbnail, Text, Left, Body, Icon, Root } from 'native-base';
+import * as api from '../network/api'
+import * as appActions from '../store/actions/app-actions'
+import { EmptyDeck } from '../components/EmptyDeck'
 export default function PlanetsScreen() {
+   //TODO render this in grid and make it fun god damn it
+  const [page, updatePage] = useState(1)
+  const [planets, updatePlanets] = useState([])
+  const [selectedPlanet, updateSelectedPlaent] = useState(null)
+  
+  function getPlanetData() {
+    api.getBodies(page)
+       .then(response => updatePlanets(response.data.data))
+       .catch(e => appActions.error("An error occured in getPlanets" + e.message))
+  }
+
+  const next = () => {
+    updatePlanets(page + 1)
+  }
+
+  const prev = () => {
+    updatePlanets(page - 1)
+  }
+
+  const getIcon = planet => {
+    //TODO
+  }
+
+  console.log("Planets and such", planets)
+
+  //On Load
+  useEffect(() => {
+    getPlanetData()
+  }, [])
+
   return (
     <ScrollView style={styles.container}>
-      {/**
-       * Go ahead and delete ExpoLinksView and replace it with your content;
-       * we just wanted to provide you with some helpful links.
-       */}
-      <ExpoLinksView />
+       <View style={{ minHeight: 700 }}>
+           {planets.map(item => (
+              <Card style={{ elevation: 3 }}>
+              <CardItem>
+                <Left>
+                  <Thumbnail source={item.image} />
+                  <Body>
+                    <Text>{item.text}</Text>
+                    <Text note>NativeBase</Text>
+                  </Body>
+                </Left>
+              </CardItem>
+              <CardItem cardBody>
+                <Image style={{ height: 300, flex: 1 }} source={item.image} />
+              </CardItem>
+              <CardItem>
+                <Icon name="heart" style={{ color: '#ED4A6A' }} />
+                <Text>{item.name}</Text>
+              </CardItem>
+            </Card>
+            ))}
+      </View>
     </ScrollView>
   );
 }
 
 PlanetsScreen.navigationOptions = {
-  title: 'Links',
+  title: 'Planet Explorer',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#010101',
   },
 });

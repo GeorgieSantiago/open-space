@@ -10,14 +10,15 @@ import {
   View,
 } from 'react-native';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
-
+import { Col, Row, Grid } from 'react-native-easy-grid';
 import { Apod } from '../components/Apod'
 import { MonoText } from '../components/StyledText';
 
 export default function HomeScreen() {
 
   const apod = useSelector(store => store.homeReducer.apod)
-  console.log("Home Screen", apod)
+  const test = useSelector(store => store)
+  console.log("testing thes tore", { test })
 
   return (
     <View style={styles.container}>
@@ -50,36 +51,29 @@ export default function HomeScreen() {
               <Text>Open Science Tools</Text>
             </CardItem>
             <CardItem>
-              <Icon active name="logo-googleplus" />
-              <Text>Google Plus</Text>
+              <Icon active name="ios-camera" />
+              <Text>Earth E.P.I.C.</Text>
               <Right>
                 <Icon name="arrow-forward" />
               </Right>
              </CardItem>
              <CardItem>
-              <Icon active name="logo-googleplus" />
-              <Text>Google Plus</Text>
+              <Icon active name="ios-planet" />
+              <Text>Orbitals and Near Earth Objects</Text>
               <Right>
                 <Icon name="arrow-forward" />
               </Right>
              </CardItem>
              <CardItem>
-              <Icon active name="logo-googleplus" />
-              <Text>Google Plus</Text>
+              <Icon active name="ios-paper" />
+              <Text>News</Text>
               <Right>
                 <Icon name="arrow-forward" />
               </Right>
              </CardItem>
              <CardItem>
-              <Icon active name="logo-googleplus" />
-              <Text>Google Plus</Text>
-              <Right>
-                <Icon name="arrow-forward" />
-              </Right>
-             </CardItem>
-             <CardItem>
-              <Icon active name="logo-googleplus" />
-              <Text>Google Plus</Text>
+              <Icon active name="ios-cog" />
+              <Text>Tools</Text>
               <Right>
                 <Icon name="arrow-forward" />
               </Right>

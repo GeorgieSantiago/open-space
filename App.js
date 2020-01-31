@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppLoading } from 'expo';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
@@ -6,14 +6,29 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Container, Text } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import * as api from './network/api'
+import * as roverActions from './store/actions/rover-actions'
+import * as homeActions from './store/actions/home-actions'
+import * as appActions from './store/actions/app-actions'
 import { store } from './store/store'
 import { Provider as ReduxProvider } from 'react-redux'
 import AppNavigator from './navigation/AppNavigator';
-
+import { ErrorToast } from './components/Error'
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
+  const [dataLoad, setDataLoadingComplete]      = useState(false)
+  //Preload redux
+  useEffect(() => {
+      api.apod()
+          .then(homeActions.getApod)
+          .catch(e => appActions.error(`Error in apod ${e.message}`))
+      api.getRovers()
+          .then(roverActions.getRovers)
+          .then(() => setDataLoadingComplete(true))
+          .catch(e => appActions.error(`Error in rovers ${e.message}`))
+      return () => {}
+  }, [])
 
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
+  if (!isLoadingComplete && !props.skipLoadingScreen && !dataLoad) {
     return (
       <AppLoading
         startAsync={loadResourcesAsync}
@@ -28,6 +43,7 @@ export default function App(props) {
         <ReduxProvider store={store}>
           <Container>
             <AppNavigator />
+            <ErrorToast />
           </Container>
         </ReduxProvider>
       </View>
@@ -55,7 +71,6 @@ async function loadResourcesAsync() {
       Roboto: require('native-base/Fonts/Roboto.ttf'),
       Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),
     }),
-    api.init(api)
   ]);
 }
 

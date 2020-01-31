@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Image } from 'react-native';
+import { Image, ActivityIndicator } from 'react-native';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
 import VideoPlayer from 'react-native-video-player';
 import { getUrlString } from '../utils/utility'
@@ -11,6 +11,8 @@ export function Apod({data}) {
     const [player, updatePlayer] = useState(null)
     return (
         <Card>
+          {data ? (
+            <>
           <CardItem>
             <Left>
               <Body>
@@ -40,7 +42,14 @@ export function Apod({data}) {
                 <Text>{data.explanation}</Text>
                 ) : null }
             </Body>
-          </CardItem>
+          </CardItem></>) : (
+          <CardItem>
+          <Body style={{justifyContent: 'center', flex: 1}}>
+             <ActivityIndicator size="large" />
+             <Text>Loading...</Text>
+          </Body>
+        </CardItem>             
+          ) }
         </Card>
     )
 }
