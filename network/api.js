@@ -11,7 +11,7 @@ import * as appActions from '../store/actions/app-actions'
  */
 export const client = axios.create({
     //baseURL: 'http://192.168.4.14:8000/api',
-    baseURL: 'http://127.0.0.1:9000/api',
+    baseURL: 'http://192.168.1.3:8000/api',
     timeout: 15000,
 });
 

@@ -38,26 +38,7 @@ export default function PlanetsScreen() {
   return (
     <ScrollView style={styles.container}>
        <View style={{ minHeight: 700 }}>
-           {planets.map(item => (
-              <Card style={{ elevation: 3 }}>
-              <CardItem>
-                <Left>
-                  <Thumbnail source={item.image} />
-                  <Body>
-                    <Text>{item.text}</Text>
-                    <Text note>NativeBase</Text>
-                  </Body>
-                </Left>
-              </CardItem>
-              <CardItem cardBody>
-                <Image style={{ height: 300, flex: 1 }} source={item.image} />
-              </CardItem>
-              <CardItem>
-                <Icon name="heart" style={{ color: '#ED4A6A' }} />
-                <Text>{item.name}</Text>
-              </CardItem>
-            </Card>
-            ))}
+         
       </View>
     </ScrollView>
   );

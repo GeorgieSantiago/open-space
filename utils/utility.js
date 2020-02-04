@@ -20,6 +20,8 @@ export function titleCase(str) {
 }
 
 export function getUrlString(str) {
-    return str.replace(" ", "%20")
+    return typeof str === "string" 
+    ? str.replace(" ", "%20")
+    : new Error(`String required got: ${typeof str} ${str}`)
 }
  
