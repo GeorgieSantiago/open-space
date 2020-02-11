@@ -186,3 +186,7 @@ export function mediaSearch(query, page) {
 export function getMedia(id) {
     return client.get(`media/getById?media_id=${id}`)
 }
+
+export function getSystems() {
+    return client.get('stars')
+}
