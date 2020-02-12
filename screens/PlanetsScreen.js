@@ -11,21 +11,23 @@ export default function PlanetsScreen() {
   const [star, updateStar] = useState(null)
   const [selectedPlanet, updateSelectedPlaent] = useState(null)
   const [root, updateRoot] = useState(null)
+  const [ready, updateReady] = useState(false)
   
   function getStarData() {
     api.getSystems(page)
        .then(response => {
-         updatePlanets(response.data.planets);updateStar(response.data.star)
+         updatePlanets(response.data.planets);updateStar(response.data.star);
        })
+       .then(() => { updateReady(true) })
        .catch(e => appActions.error("An error occured in getPlanets" + e.message))
   }
 
   const next = () => {
-    updatePlanets(page + 1)
+    updatePage(page + 1)
   }
 
   const prev = () => {
-    updatePlanets(page - 1)
+    updatePage(page - 1)
   }
 
   const getIcon = planet => {
@@ -38,7 +40,7 @@ export default function PlanetsScreen() {
   }, [])
 
   renderExplorer = () => 
-    planets && star ? 
+    ready ? 
         (<SpaceExplorer planets={planets} star={star} />)
         : (<ActivityIndicator />)
 

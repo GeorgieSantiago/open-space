@@ -30,6 +30,16 @@ export default class SpaceExplorer extends React.Component {
     );
   }
 
+  introZoom = () => {
+    if(this.camera.position.z > 300) {
+        this.camera.position.z -= 10
+    } else {
+        this.setState({
+            initialRender: false
+        })
+    }
+  }
+
   // This is called by the `ExpoGraphics.View` once it's initialized
   onContextCreate = async ({
     gl,
@@ -43,7 +53,27 @@ export default class SpaceExplorer extends React.Component {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.clock = new THREE.Clock();
-    this.camera.position.z = 250;
+    this.camera.position.z = 1200;
+    this.textureLoader = new THREE.TextureLoader()
+
+            // Load the background texture
+    const bgTexture = this.textureLoader.load('/assets/images/space-bg.png')
+    const backgroundMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(2, 2, 0),
+        new THREE.MeshBasicMaterial({
+            map: bgTexture
+        })
+    );
+    
+            backgroundMesh.material.depthTest = false;
+            backgroundMesh.material.depthWrite = false;
+    
+            // Create your background scene
+            this.backgroundScene = new THREE.Scene();
+            this.backgroundCamera = new THREE.Camera();
+            this.backgroundScene.add(this.backgroundCamera);
+            this.backgroundScene.add(backgroundMesh);
+    
     /**
      * Create Geometric Figures
      */
@@ -96,24 +126,24 @@ export default class SpaceExplorer extends React.Component {
         const physics = {
             orbitRate: 1,
             rotationRate: 1,
-            distanceFromAxis: (i + 1) * 10,
+            distanceFromAxis: (i + 1) * 100,
             name: planet.name,
-            size: Math.PI * (planet.radius * planet.radius)
+            size: Math.PI * (planet.radius * planet.radius) 
         }
         //Create object shape
-        const geometry = new THREE.SphereGeometry(10);
+        const geometry = new THREE.SphereGeometry(physics.size * 3);
         //Create object material
         const material = new THREE.MeshPhongMaterial({
-          color: "#006994",
+          color: "#ffffff",
         });
 
-        material.receiveShadow = true
-        material.castShadow = true
+//        material.receiveShadow = true
+//        material.castShadow = true
         //Create the object as a mesh
         const planetObj = new THREE.Mesh(geometry, material);
         //Set position
-        planetObj.position.set(physics.distanceFromAxis + 10, 0, 0)
         planetObj.name = planet.name
+        planetObj.position.set(50 * (i + 1), 2 * (i + 1), 0)
         //add planet to context list
         this.planets.push(planetObj)
         //store physics config
@@ -184,23 +214,29 @@ export default class SpaceExplorer extends React.Component {
       moon.position.z = moon.position.z + planet.position.z
   }
 
+  createVisableOrbit = planet => {
+      const orbitalWidth = 0.1
+      const orbit = getRing(planet.distanceFromAxis + orbitalWidth,
+        planet.distanceFromAxis - orbitalWidth,
+        320,
+        0xffffff,
+        planet.name,
+        0)
+  }
+
   getPhysics = planet => (this.planets.filter(planetPhysics => 
     planetPhysics.name === planet.name ? (planetPhysics) : null
   ))
 
-  update() {
-      this.light.position.copy(this.star.position)
-      const time = Date.now()
-
-      this.planets.map(planet => this.movePlanet(planet, time))
-      //recursively call update? or this.update?
-      requestAnimationFrame(() => {
-          this.update(this.renderer, this.scene, this.camera, this.controls)
-      })
-  }
-
   onRender = delta => {
-    this.update()
+    this.light.position.copy(this.star.position)
+    const time = Date.now()
+    this.star.rotation.y = 10 * delta
+    if(this.state.initialRender) {
+        this.introZoom()
+    }
+    //this.planets.map(planet => this.movePlanet(planet, time))
+    this.renderer.render(this.backgroundScene , this.backgroundCamera );
     this.renderer.render(this.scene, this.camera);
   };
 }
