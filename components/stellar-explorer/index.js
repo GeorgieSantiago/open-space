@@ -1,10 +1,10 @@
 import { View as GraphicsView } from 'expo-graphics';
 import ExpoTHREE, { THREE } from 'expo-three';
-import React from 'react';
+import React, { Component } from 'react';
 import { Button, Text } from 'react-native'
 import { State, LongPressGestureHandler, TapGestureHandler, PanGestureHandler, FlingGestureHandler, RotationGestureHandler } from 'react-native-gesture-handler';
 
-export default class SpaceExplorer extends React.Component {
+export default class SpaceExplorer extends Component {
 
   constructor(props) {
       super(props)
@@ -32,6 +32,21 @@ export default class SpaceExplorer extends React.Component {
     console.log("rotate?", e)
   }
 
+  _handleTouchStart = (event) => {
+    const x = event.nativeEvent.locationX;
+    const y = event.nativeEvent.locationY;
+
+    console.log("handleTouchStart", {
+      event, x, y
+    })
+  }
+
+  _handlePressStart = (event) => {
+    console.log("handlePressStart" , {
+      event,
+    })
+  }
+
   render() {
     // Create an `ExpoGraphics.View` covering the whole screen, tell it to call our
     // `onContextCreate` function once it's initialized.
@@ -40,6 +55,9 @@ export default class SpaceExplorer extends React.Component {
       <GraphicsView
         onContextCreate={this.onContextCreate}
         onRender={this.onRender}
+        onTouchStart={this._handleTouchStart}
+        isShadowsEnabled={true}
+        onPress={this._handlePressStart}
       />
       </>
     );
@@ -63,7 +81,6 @@ export default class SpaceExplorer extends React.Component {
     height,
     scale: pixelRatio,
   }) => {
-    console.log("planets and stars" , this.props.star, this.props.planets)
     this.renderer = new ExpoTHREE.Renderer({ gl, pixelRatio, width, height });
     this.renderer.setClearColor("#000")
     this.scene = new THREE.Scene();
@@ -97,6 +114,7 @@ export default class SpaceExplorer extends React.Component {
     /**
      * Create Geometric Figures
      */
+    this.createControls()
     this.createStarField()
     this.createStar()
     this.createPlanets()
@@ -108,6 +126,28 @@ export default class SpaceExplorer extends React.Component {
     const ambientLight = new THREE.AmbientLight(0xaaaaaa)
     this.scene.add(ambientLight)     
    };
+
+  createControls() {
+    this.raycaster = new THREE.Raycaster()
+    this.raycasterCheck = false
+    this.pressVector = {
+      x: 0,
+      y: 0
+    }
+  }
+
+  checkHit(intersects) {
+    console.error("intersects", { intersects })
+		var i = 0,
+			l = intersects.length;
+
+		if (l > 0) {
+
+			if (intersects[0].object.parent && intersects[i].object.parent.name === "star") {
+			}
+
+		}
+	}
 
   createStar() {
     const { star } = this.props
@@ -122,6 +162,7 @@ export default class SpaceExplorer extends React.Component {
     material.castShadow = true
 
     const starObj = new THREE.Mesh(geometry, material);
+    console.log("star object to check" , { starObj })
     this.star = starObj
     this.star.position.set(0,0,0)
 
@@ -235,27 +276,11 @@ export default class SpaceExplorer extends React.Component {
   }
 
   movePlanet = (planet, index, stopRotation=false) => {
-      const physics = this.getPhysics(planet.name)
-      const { orbitValue } = this.state
+      //const physics = this.getPhysics(planet.name)
       this.theta += this.dTheta;
       planet.rotation.y -= .001
-      //planet.position.y - 100 * index
       planet.position.x = (this.r + (index * 32)) * Math.cos(this.theta)
       planet.position.z = (this.r + (index * 32)) * Math.sin(this.theta)
-      
-      /*const physics = this.getPhysics(planet)
-      planet.position.set(
-        Math.cos(time) * physics.distanceFromAxis * .001,
-        Math.sin(time) * physics.distanceFromAxis * .001,
-        0
-      )*/
-      /*
-      if(!stopRotation) {
-          planet.rotation.y += physics.rotationRate
-      }
-
-      planet.position.x = Math.cos(time * (1.0 / (physics.orbitRate * orbitValue)) + 10.0)
-      planet.position.z = Math.cos(time * (1.0 / (physics.orbitRate * orbitValue)) + 10.0)*/
   }
 
   moveMoon = (moon, planet, time) => {
@@ -280,6 +305,21 @@ export default class SpaceExplorer extends React.Component {
     ))
   }
 
+  onPressHandler(event) {
+    /*
+		event.preventDefault();
+		document.addEventListener('mousemove', onDocumentMouseMove, false);
+		document.addEventListener('mouseup', onDocumentMouseUp, false);
+		document.addEventListener('mouseout', onDocumentMouseOut, false);
+		mouseXOnMouseDown = event.clientX - windowHalfX;
+		mouseYOnMouseDown = event.clientY - windowHalfY;
+		targetRotationXOnMouseDown = targetRotationX;
+		targetRotationYOnMouseDown = targetRotationY;*/
+		this.pressVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+		this.pressVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+		this.raycasterCheck = true;
+	}
+
   onRender = delta => {
     this.light.position.copy(this.star.position)
     const time = Date.now()
@@ -287,6 +327,16 @@ export default class SpaceExplorer extends React.Component {
     if(this.state.initialRender) {
         this.introZoom()
     }
+
+    if (this.raycasterCheck) {
+			this.raycaster.setFromCamera(this.pressVector, this.camera);
+
+			const intersects = raycaster.intersectObjects(this.scene.children, true);
+			if (intersects.length > 0) {
+				this.checkHit(intersects);
+			}
+			this.raycasterCheck = false;
+		}
     
     this.planets.map((planet, k) => this.movePlanet(planet, k))
     this.renderer.render(this.backgroundScene , this.backgroundCamera );
