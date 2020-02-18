@@ -1,6 +1,8 @@
 import { View as GraphicsView } from 'expo-graphics';
 import ExpoTHREE, { THREE } from 'expo-three';
 import React from 'react';
+import { Button, Text } from 'react-native'
+import { State, LongPressGestureHandler, TapGestureHandler, PanGestureHandler, FlingGestureHandler, RotationGestureHandler } from 'react-native-gesture-handler';
 
 export default class SpaceExplorer extends React.Component {
 
@@ -11,7 +13,10 @@ export default class SpaceExplorer extends React.Component {
       this.state = {
           planetPhysics: {},
           initialRender: true,
-          orbitValue: 200
+          orbitValue: 200,
+          r: 35,
+          theta: 0,
+          dTheta: 2 * Math.PI / 1000
       }
   }
 
@@ -19,14 +24,24 @@ export default class SpaceExplorer extends React.Component {
     THREE.suppressExpoWarnings();
   }
 
+  _pan = e => {
+    console.log("pan?" , e)
+  }
+
+  _rotate = e => {
+    console.log("rotate?", e)
+  }
+
   render() {
     // Create an `ExpoGraphics.View` covering the whole screen, tell it to call our
     // `onContextCreate` function once it's initialized.
     return (
+      <>
       <GraphicsView
         onContextCreate={this.onContextCreate}
         onRender={this.onRender}
       />
+      </>
     );
   }
 
@@ -48,16 +63,21 @@ export default class SpaceExplorer extends React.Component {
     height,
     scale: pixelRatio,
   }) => {
+    console.log("planets and stars" , this.props.star, this.props.planets)
     this.renderer = new ExpoTHREE.Renderer({ gl, pixelRatio, width, height });
     this.renderer.setClearColor("#000")
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.clock = new THREE.Clock();
     this.camera.position.z = 1200;
+    this.camera.position.y  = 50;
+    this.r = 35
+    this.theta = 0
+    this.dTheta = 2 * Math.PI / 1000
     this.textureLoader = new THREE.TextureLoader()
 
             // Load the background texture
-    const bgTexture = this.textureLoader.load('/assets/images/space-bg.png')
+    const bgTexture = this.textureLoader.load('/assets/images/static/space.png')
     const backgroundMesh = new THREE.Mesh(
         new THREE.PlaneGeometry(2, 2, 0),
         new THREE.MeshBasicMaterial({
@@ -77,11 +97,12 @@ export default class SpaceExplorer extends React.Component {
     /**
      * Create Geometric Figures
      */
+    this.createStarField()
     this.createStar()
     this.createPlanets()
     this.scene.add(new THREE.AmbientLight(0x404040));
 
-    this.light = this.createPointLight(1.5, this.star.color)
+    this.light = this.createPointLight(3.5, this.star.color)
     this.scene.add(this.light)
 
     const ambientLight = new THREE.AmbientLight(0xaaaaaa)
@@ -94,6 +115,7 @@ export default class SpaceExplorer extends React.Component {
 
     const material = new THREE.MeshPhongMaterial({
       color: this.getColor(star.color),
+      shininess: 5
     });
     
     material.receiveShadow = true
@@ -106,6 +128,10 @@ export default class SpaceExplorer extends React.Component {
     this.scene.add(this.star);
 
     //Create the corona of the sun TODO 
+  }
+
+  createStarField() { 
+
   }
 
   createPlanets = () => {
@@ -126,12 +152,13 @@ export default class SpaceExplorer extends React.Component {
         const physics = {
             orbitRate: 1,
             rotationRate: 1,
-            distanceFromAxis: (i + 1) * 100,
+            distanceFromAxis: (i + 1) * 300,
             name: planet.name,
-            size: Math.PI * (planet.radius * planet.radius) 
+            size: Math.PI * (planet.radius * planet.radius),
+            index: i 
         }
         //Create object shape
-        const geometry = new THREE.SphereGeometry(physics.size * 3);
+        const geometry = new THREE.SphereGeometry(physics.size + 2 * 3);
         //Create object material
         const material = new THREE.MeshPhongMaterial({
           color: "#ffffff",
@@ -143,8 +170,10 @@ export default class SpaceExplorer extends React.Component {
         const planetObj = new THREE.Mesh(geometry, material);
         //Set position
         planetObj.name = planet.name
-        planetObj.position.set(50 * (i + 1), 2 * (i + 1), 0)
+        planetObj.castShadow = true
+        planetObj.position.set(12 * (i), 12, 0)
         //add planet to context list
+        console.log("planet created " + planetObj.name )
         this.planets.push(planetObj)
         //store physics config
         this.setState(prevState => ({
@@ -191,27 +220,48 @@ export default class SpaceExplorer extends React.Component {
       switch(code) {
           case "white":
               color = "#fafdec"
+          case "red": 
+              color = "#ce2029"
+          case "yellow": 
+              color = "#f9d71c"
+          case "orange":
+              color = "#FFA500"
+          case "blue": 
+              color = "#007bb8"
           default:
       }
 
       return color
   }
 
-  movePlanet = (planet, time, stopRotation=false) => {
+  movePlanet = (planet, index, stopRotation=false) => {
+      const physics = this.getPhysics(planet.name)
       const { orbitValue } = this.state
-      const physics = this.getPhysics(planet)
+      this.theta += this.dTheta;
+      planet.rotation.y -= .001
+      //planet.position.y - 100 * index
+      planet.position.x = (this.r + (index * 32)) * Math.cos(this.theta)
+      planet.position.z = (this.r + (index * 32)) * Math.sin(this.theta)
+      
+      /*const physics = this.getPhysics(planet)
+      planet.position.set(
+        Math.cos(time) * physics.distanceFromAxis * .001,
+        Math.sin(time) * physics.distanceFromAxis * .001,
+        0
+      )*/
+      /*
       if(!stopRotation) {
           planet.rotation.y += physics.rotationRate
       }
 
       planet.position.x = Math.cos(time * (1.0 / (physics.orbitRate * orbitValue)) + 10.0)
-      planet.position.z = Math.cos(time * (1.0 / (physics.orbitRate * orbitValue)) + 10.0)
+      planet.position.z = Math.cos(time * (1.0 / (physics.orbitRate * orbitValue)) + 10.0)*/
   }
 
   moveMoon = (moon, planet, time) => {
-      this.movePlanet(moon, this.getPhysics(planet))
+      this.movePlanet(moon, this.getPhysics(planet.name))
       moon.position.x = moon.position.x + planet.position.x
-      moon.position.z = moon.position.z + planet.position.z
+      moon.position.z = moon.position.z + planet.position.z 
   }
 
   createVisableOrbit = planet => {
@@ -224,9 +274,11 @@ export default class SpaceExplorer extends React.Component {
         0)
   }
 
-  getPhysics = planet => (this.planets.filter(planetPhysics => 
-    planetPhysics.name === planet.name ? (planetPhysics) : null
-  ))
+  getPhysics = name => {
+    return (this.planets.filter(planetPhysics => 
+    planetPhysics.name === name ? (planetPhysics) : null
+    ))
+  }
 
   onRender = delta => {
     this.light.position.copy(this.star.position)
@@ -235,8 +287,11 @@ export default class SpaceExplorer extends React.Component {
     if(this.state.initialRender) {
         this.introZoom()
     }
-    //this.planets.map(planet => this.movePlanet(planet, time))
+    
+    this.planets.map((planet, k) => this.movePlanet(planet, k))
     this.renderer.render(this.backgroundScene , this.backgroundCamera );
     this.renderer.render(this.scene, this.camera);
   };
+
+  zoom = value => this.camera.position.z += value
 }

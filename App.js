@@ -62,6 +62,7 @@ async function loadResourcesAsync() {
       require('./assets/images/spirit.png'),
       require('./assets/images/opportunity.png'),
       require('./assets/images/space-bg.png'),
+      require('./assets/images/static/space.png'),
     ]),
     Font.loadAsync({
       // This is the font that we are using for our tab bar

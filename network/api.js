@@ -179,8 +179,8 @@ export function getProjects(page=1) {
  * @param {integer} page
  * @return {Promise} 
  */
-export function mediaSearch(query, page) {
-    return client.get(`/media?search=${query}&page=${page}`)
+export function mediaSearch(query, page=1) {
+    return client.get(`media?search=${query}&page=${page}`)
 }
 
 export function getMedia(id) {
