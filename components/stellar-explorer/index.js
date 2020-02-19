@@ -1,7 +1,7 @@
 import { View as GraphicsView } from 'expo-graphics';
 import ExpoTHREE, { THREE } from 'expo-three';
 import React, { Component } from 'react';
-import { Button, Text } from 'react-native'
+import { Button, Text, PanResponder, View } from 'react-native'
 import { State, LongPressGestureHandler, TapGestureHandler, PanGestureHandler, FlingGestureHandler, RotationGestureHandler } from 'react-native-gesture-handler';
 
 export default class SpaceExplorer extends Component {
@@ -18,40 +18,33 @@ export default class SpaceExplorer extends Component {
           theta: 0,
           dTheta: 2 * Math.PI / 1000
       }
+
+      this.panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: (e, gesture) => true,
+        onPanResponderGrant: (e, gesture) => {},
+        onPanResponderMove: ({ nativeEvent }, gestureState) => {
+          
+          requestAnimationFrame(() => {
+            if( gestureState.numberActiveTouches === 1 ) {
+//            this.camera.position.z += nativeEvent.locationX > 150 ? 2 : -2;
+            this.camera.position.x += nativeEvent.locationX > 150 ? 2 : -2;
+          }
+          })
+        },
+      });
   }
 
   componentDidMount() {
     THREE.suppressExpoWarnings();
   }
 
-  _pan = e => {
-    console.log("pan?" , e)
-  }
-
-  _rotate = e => {
-    console.log("rotate?", e)
-  }
-
-  _handleTouchStart = (event) => {
-    const x = event.nativeEvent.locationX;
-    const y = event.nativeEvent.locationY;
-
-    console.log("handleTouchStart", {
-      event, x, y
-    })
-  }
-
-  _handlePressStart = (event) => {
-    console.log("handlePressStart" , {
-      event,
-    })
-  }
-
   render() {
     // Create an `ExpoGraphics.View` covering the whole screen, tell it to call our
     // `onContextCreate` function once it's initialized.
     return (
-      <>
+      <View style={{ flex: 1 }}
+          {...this.panResponder.panHandlers}
+      >
       <GraphicsView
         onContextCreate={this.onContextCreate}
         onRender={this.onRender}
@@ -59,7 +52,7 @@ export default class SpaceExplorer extends Component {
         isShadowsEnabled={true}
         onPress={this._handlePressStart}
       />
-      </>
+      </View>
     );
   }
 
@@ -76,7 +69,6 @@ export default class SpaceExplorer extends Component {
   // This is called by the `ExpoGraphics.View` once it's initialized
   onContextCreate = async ({
     gl,
-    canvas,
     width,
     height,
     scale: pixelRatio,
@@ -136,17 +128,8 @@ export default class SpaceExplorer extends Component {
     }
   }
 
-  checkHit(intersects) {
-    console.error("intersects", { intersects })
-		var i = 0,
-			l = intersects.length;
-
-		if (l > 0) {
-
-			if (intersects[0].object.parent && intersects[i].object.parent.name === "star") {
-			}
-
-		}
+  checkCollision() {
+ 
 	}
 
   createStar() {
@@ -327,17 +310,7 @@ export default class SpaceExplorer extends Component {
     if(this.state.initialRender) {
         this.introZoom()
     }
-
-    if (this.raycasterCheck) {
-			this.raycaster.setFromCamera(this.pressVector, this.camera);
-
-			const intersects = raycaster.intersectObjects(this.scene.children, true);
-			if (intersects.length > 0) {
-				this.checkHit(intersects);
-			}
-			this.raycasterCheck = false;
-		}
-    
+    this.checkCollision()
     this.planets.map((planet, k) => this.movePlanet(planet, k))
     this.renderer.render(this.backgroundScene , this.backgroundCamera );
     this.renderer.render(this.scene, this.camera);

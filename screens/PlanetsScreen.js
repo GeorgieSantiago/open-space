@@ -40,8 +40,8 @@ export default function PlanetsScreen() {
   }, [])
 
   renderExplorer = () => 
-    ready ? 
-        (<SpaceExplorer planets={planets} star={star} />)
+    ready 
+        ? (<SpaceExplorer planets={planets} star={star} />)
         : (<ActivityIndicator />)
 
 
