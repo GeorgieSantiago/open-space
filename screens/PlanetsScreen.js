@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import { Container, Header, View, DeckSwiper, Card, CardItem, Thumbnail, Text, Left, Body, Icon, Root } from 'native-base';
+import { StyleSheet, ActivityIndicator } from 'react-native';
+import { Button, Text } from 'native-base';
 import * as api from '../network/api'
 import * as appActions from '../store/actions/app-actions'
 import SpaceExplorer from '../components/stellar-explorer'
@@ -22,16 +22,15 @@ export default function PlanetsScreen() {
        .catch(e => appActions.error("An error occured in getPlanets" + e.message))
   }
 
-  const next = () => {
-    updatePage(page + 1)
-  }
+  /**
+   * Get next system
+   */
+  const getNextSystem = () => {
 
-  const prev = () => {
-    updatePage(page - 1)
   }
 
   const getIcon = planet => {
-    //TODO
+    //@TODO
   }
 
   //On Load
@@ -41,7 +40,14 @@ export default function PlanetsScreen() {
 
   renderExplorer = () => 
     ready 
-        ? (<SpaceExplorer planets={planets} star={star} />)
+        ? (<>
+            <SpaceExplorer planets={planets} star={star} />
+            <Button full primary>
+              <Text>
+                FTL Drive
+              </Text>
+            </Button>
+        </>)
         : (<ActivityIndicator />)
 
 

@@ -23,13 +23,16 @@ export default class SpaceExplorer extends Component {
         onStartShouldSetPanResponder: (e, gesture) => true,
         onPanResponderGrant: (e, gesture) => {},
         onPanResponderMove: ({ nativeEvent }, gestureState) => {
-          
+          //@TODO Set different geastures and actions
           requestAnimationFrame(() => {
             if( gestureState.numberActiveTouches === 1 ) {
 //            this.camera.position.z += nativeEvent.locationX > 150 ? 2 : -2;
             this.camera.position.x += nativeEvent.locationX > 150 ? 2 : -2;
           }
           })
+        },
+        onPanResponderRelease: (event, gestureState) => {
+          console.log("Event and gestureState if one finger its a click", event, gestureState)
         },
       });
   }
@@ -134,7 +137,8 @@ export default class SpaceExplorer extends Component {
 
   createStar() {
     const { star } = this.props
-    const geometry = new THREE.SphereGeometry(10);
+    //Change this to be more accurate
+    const geometry = new THREE.SphereGeometry(30);
 
     const material = new THREE.MeshPhongMaterial({
       color: this.getColor(star.color),
@@ -155,7 +159,7 @@ export default class SpaceExplorer extends Component {
   }
 
   createStarField() { 
-
+        //@TODO create background star field.
   }
 
   createPlanets = () => {
@@ -184,20 +188,22 @@ export default class SpaceExplorer extends Component {
         //Create object shape
         const geometry = new THREE.SphereGeometry(physics.size + 2 * 3);
         //Create object material
+        //@TODO add planet meshes
         const material = new THREE.MeshPhongMaterial({
           color: "#ffffff",
         });
 
-//        material.receiveShadow = true
-//        material.castShadow = true
+        material.receiveShadow = true
+        material.castShadow = true
         //Create the object as a mesh
         const planetObj = new THREE.Mesh(geometry, material);
         //Set position
         planetObj.name = planet.name
         planetObj.castShadow = true
-        planetObj.position.set(12 * (i), 12, 0)
+        //@TODO set distance from star and figure out
+        //random starting position in orbit.
+        planetObj.position.set(20 * (i), 0, 0)
         //add planet to context list
-        console.log("planet created " + planetObj.name )
         this.planets.push(planetObj)
         //store physics config
         this.setState(prevState => ({
@@ -216,7 +222,7 @@ export default class SpaceExplorer extends Component {
       light.shadow.mapSize.height = 2048 //Optamize this
       return light
   }
-
+  //@TODO
   getRing = (size, innerDiameter, color, name, distanceFromAxis) => {
       const geometry = new THREE.RingGeometry(size, innerDiameter, facets)
       const material = new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide})
@@ -227,7 +233,7 @@ export default class SpaceExplorer extends Component {
       this.scene.add(ring)
       return ring
   }
-
+  //@TODO 
   getTube = (size, innerDiameter, color, name, distanceFromAxis) => {
     const geometry = new THREE.TorusGeometry(size, innerDiameter, facets)
     const material = new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide})
@@ -289,15 +295,6 @@ export default class SpaceExplorer extends Component {
   }
 
   onPressHandler(event) {
-    /*
-		event.preventDefault();
-		document.addEventListener('mousemove', onDocumentMouseMove, false);
-		document.addEventListener('mouseup', onDocumentMouseUp, false);
-		document.addEventListener('mouseout', onDocumentMouseOut, false);
-		mouseXOnMouseDown = event.clientX - windowHalfX;
-		mouseYOnMouseDown = event.clientY - windowHalfY;
-		targetRotationXOnMouseDown = targetRotationX;
-		targetRotationYOnMouseDown = targetRotationY;*/
 		this.pressVector.x = (event.clientX / window.innerWidth) * 2 - 1;
 		this.pressVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
 		this.raycasterCheck = true;
